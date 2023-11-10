@@ -16,7 +16,7 @@ def coletar():
                            os.path.exists(os.path.join(diretorio, arquivo))]
 
     if arquivos_existentes:
-
+        print("Arquivo Encontrado",arquivos_existentes)
         arquivo_a_abrir = arquivos_existentes[0]
 
         with open(arquivo_a_abrir, "r", encoding="ISO-8859-1") as file:
@@ -36,13 +36,28 @@ def coletar():
             row_data = [cell.get_text(strip=True) for cell in row.find_all("td")]
             data.append(row_data)
 
-        df = pd.DataFrame(data, columns=headers)
-        df = df.replace("", "-")
-        df.to_csv("dados_embrapa.csv", index=False)
 
+        df = pd.DataFrame(data, columns=headers)
+
+        df = df.replace("", "-")
+
+        periodo_acompanhamento = soup.find('select', {"id": "periodoAcompanhamntoId"})
+
+        periodo = periodo_acompanhamento.find('option', {"selected": True})
+
+        periodo = periodo.get_text(strip=True)
+        if "(" in periodo:
+            posicao_parentese = periodo.find('(')
+            valor_antes_parentese = int(periodo[:posicao_parentese].strip())
+            print("Quadrimestre",valor_antes_parentese)
+            df['Quadrimestre'] = valor_antes_parentese
+            df.to_csv("dados_embrapa.csv", index=False)
+        else:
+            print("Quadrimestre:",periodo)
+            df['Periodo'] = periodo
+            df.to_csv("dados_embrapa.csv", index=False)
 
     else:
-
         print("Nenhum dos arquivos desejados foi encontrado na pasta.")
 
 def formatando_arquivo():
@@ -94,7 +109,7 @@ def duplicar():
 
 
     for index, row in df.iterrows():
-        previsto_info = row["Previsto (% )"]
+        previsto_info = row["Previsto (%)"]
 
 
         if index in [0, 1, len(df) - 1]:
@@ -148,6 +163,15 @@ def duplicar():
     new_df = new_df.replace("nan)", "")
 
     new_df.to_csv("dados_embrapa.csv", index=False)
+    dados = pd.read_csv("dados_embrapa.csv")
+    linhas_para_reposicionar = dados[(dados['Executado (%)'].notnull()) & (dados['Previsto (%)'].isnull())]
+
+    dados.loc[linhas_para_reposicionar.index, 'Previsto (%)'] = linhas_para_reposicionar['Executado (%)']
+    dados.loc[linhas_para_reposicionar.index, 'Executado (%)'] = None
+
+    dados.to_csv("dados_embrapa.csv", index=False)
+
+    print("Valores reposicionados com sucesso.")
 
 if __name__ == '__main__':
     coletar()
