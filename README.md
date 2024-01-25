@@ -4,9 +4,9 @@ Exemplo: <br>
 coluna 1 <br>
 valor1(3)
 
-apos a formatação 
+apos a formatação <br>
 
-coluna  1 
-valor1
-valor1
-valor1
+coluna  1 <br>
+valor1<br>
+valor1<br>
+valor1<br>
