@@ -5,12 +5,9 @@ import os
 def coletar():
 
     arquivos = [
-        "Integro_2023_QAcumulado.html",
-        "Integro_2023_Q1.html",
-        "Integro_2023_Q2.html",
-        "Integro_2023_Q3.html"
+        "arquivos.html",
     ]
-    diretorio = "C:/Users/aaron/PycharmProjects/pythonProject2/arquivos_html"
+    diretorio = "caminho/para/arquivo.html"
 
     arquivos_existentes = [os.path.join(diretorio, arquivo) for arquivo in arquivos if
                            os.path.exists(os.path.join(diretorio, arquivo))]
@@ -22,7 +19,7 @@ def coletar():
         with open(arquivo_a_abrir, "r", encoding="ISO-8859-1") as file:
             soup = BeautifulSoup(file, "html.parser")
 
-        table = soup.find("table", {"id": "acompanhamento"})
+        table = soup.find("table", {"id": "id_do_elemento_html"})
 
         headers = []
         data = []
@@ -51,28 +48,28 @@ def coletar():
             valor_antes_parentese = int(periodo[:posicao_parentese].strip())
             print("Quadrimestre",valor_antes_parentese)
             df['Quadrimestre'] = valor_antes_parentese
-            df.to_csv("dados_embrapa.csv", index=False)
+            df.to_csv("dados.csv", index=False)
         else:
             print("Quadrimestre:",periodo)
             df['Periodo'] = periodo
-            df.to_csv("dados_embrapa.csv", index=False)
+            df.to_csv("dados.csv", index=False)
 
     else:
         print("Nenhum dos arquivos desejados foi encontrado na pasta.")
 
 def formatando_arquivo():
 
-    df = pd.read_csv("dados_embrapa.csv")
+    df = pd.read_csv("dados.csv")
     for coluna in df.columns:
         if df[coluna].dtype == 'object':
             df[coluna] = df[coluna].apply(lambda x: re.sub(r'\s+', ' ', str(x)).strip())
 
     df = df.replace("nan", "")
 
-    df.to_csv("dados_embrapa.csv", index=False)
+    df.to_csv("dados.csv", index=False)
 
 def normalizar():
-    df = pd.read_csv("dados_embrapa.csv")
+    df = pd.read_csv("dados.csv")
     new_df = pd.DataFrame()
 
     for index, row in df.iterrows():
@@ -98,12 +95,12 @@ def normalizar():
             new_df = pd.concat([new_df, new_row.to_frame().T], ignore_index=True)
 
 
-    new_df.to_csv("dados_embrapa.csv", index=False)
+    new_df.to_csv("dados.csv", index=False)
 
 
 def duplicar():
 
-    df = pd.read_csv("dados_embrapa.csv")
+    df = pd.read_csv("dados.csv")
 
     new_data = []
 
@@ -130,9 +127,9 @@ def duplicar():
         else:
             new_data.append(row)
     new_df = pd.DataFrame(new_data)
-    new_df.to_csv("dados_embrapa.csv", index=False)
+    new_df.to_csv("dados.csv", index=False)
 
-    df = pd.read_csv("dados_embrapa.csv")
+    df = pd.read_csv("dados.csv")
     new_data2 = []
 
     for index2, row2 in df.iterrows():
@@ -162,14 +159,14 @@ def duplicar():
     new_df = pd.DataFrame(new_data2)
     new_df = new_df.replace("nan)", "")
 
-    new_df.to_csv("dados_embrapa.csv", index=False)
-    dados = pd.read_csv("dados_embrapa.csv")
+    new_df.to_csv("dados.csv", index=False)
+    dados = pd.read_csv("dados.csv")
     linhas_para_reposicionar = dados[(dados['Executado (%)'].notnull()) & (dados['Previsto (%)'].isnull())]
 
     dados.loc[linhas_para_reposicionar.index, 'Previsto (%)'] = linhas_para_reposicionar['Executado (%)']
     dados.loc[linhas_para_reposicionar.index, 'Executado (%)'] = None
 
-    dados.to_csv("dados_embrapa.csv", index=False)
+    dados.to_csv("dados.csv", index=False)
 
     print("Valores reposicionados com sucesso.")
 
